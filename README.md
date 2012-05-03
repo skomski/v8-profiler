@@ -4,7 +4,7 @@ node.js bindings for the v8 profiler
 
 ## Installation
 
-    npm install v8-profiler
+    npm install https://github.com/Skomski/v8-profiler/tarball/v3.7.1
 
 ## Usage
 
