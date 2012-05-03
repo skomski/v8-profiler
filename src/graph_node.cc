@@ -5,7 +5,7 @@
 using namespace v8;
 
 namespace nodex {
-  
+
 Persistent<ObjectTemplate> GraphNode::node_template_;
 
 void GraphNode::Initialize() {
@@ -13,6 +13,7 @@ void GraphNode::Initialize() {
   node_template_->SetInternalFieldCount(1);
   node_template_->SetAccessor(String::New("type"), GraphNode::GetType);
   node_template_->SetAccessor(String::New("name"), GraphNode::GetName);
+  node_template_->SetAccessor(String::New("value"), GraphNode::GetValue);
   node_template_->SetAccessor(String::New("id"), GraphNode::GetId);
   node_template_->SetAccessor(String::New("ptr"), GraphNode::GetPtr);
   node_template_->SetAccessor(String::New("childrenCount"), GraphNode::GetChildrenCount);
@@ -67,6 +68,14 @@ Handle<Value> GraphNode::GetName(Local<String> property, const AccessorInfo& inf
   void* ptr = self->GetPointerFromInternalField(0);
   Handle<String> title = static_cast<HeapGraphNode*>(ptr)->GetName();
   return scope.Close(title);
+}
+
+Handle<Value> GraphNode::GetValue(Local<String> property, const AccessorInfo& info) {
+  HandleScope scope;
+  Local<Object> self = info.Holder();
+  void* ptr = self->GetPointerFromInternalField(0);
+  Handle<Value> value = static_cast<HeapGraphNode*>(ptr)->GetHeapValue();
+  return scope.Close(value);
 }
 
 Handle<Value> GraphNode::GetId(Local<String> property, const AccessorInfo& info) {
@@ -128,7 +137,7 @@ Handle<Value> GraphNode::GetRetainedSize(const Arguments& args) {
 
   Handle<Object> self = args.This();
   void* ptr = self->GetPointerFromInternalField(0);
-  
+
 #if NODE_VERSION_AT_LEAST(0, 7, 0)
   int32_t size = static_cast<HeapGraphNode*>(ptr)->GetRetainedSize();
 #else
@@ -136,9 +145,9 @@ Handle<Value> GraphNode::GetRetainedSize(const Arguments& args) {
   if (args.Length() > 0) {
     exact = args[0]->BooleanValue();
   }
-  int32_t size = static_cast<HeapGraphNode*>(ptr)->GetRetainedSize(exact); 
+  int32_t size = static_cast<HeapGraphNode*>(ptr)->GetRetainedSize(exact);
 #endif
-  
+
   return scope.Close(Integer::New(size));
 }
 

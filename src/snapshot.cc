@@ -53,10 +53,10 @@ Handle<Value> Snapshot::GetType(Local<String> property, const AccessorInfo& info
   HandleScope scope;
   Local<Object> self = info.Holder();
   void* ptr = self->GetPointerFromInternalField(0);
-  
+
   HeapSnapshot::Type type = static_cast<HeapSnapshot*>(ptr)->GetType();
   Local<String> t;
-  
+
   switch(type) {
     case HeapSnapshot::kFull:
       t = String::New("Full");
@@ -64,7 +64,7 @@ Handle<Value> Snapshot::GetType(Local<String> property, const AccessorInfo& info
     default:
       t = String::New("Unknown");
   }
-  
+
   return scope.Close(t);
 }
 
@@ -73,7 +73,7 @@ Handle<Value> Snapshot::GetNodesCount(Local<String> property, const AccessorInfo
   Local<Object> self = info.Holder();
   void* ptr = self->GetPointerFromInternalField(0);
   Local<Integer> count = Integer::New(static_cast<HeapSnapshot*>(ptr)->GetNodesCount());
-  
+
   return scope.Close(count);
 }
 
@@ -115,11 +115,11 @@ Handle<Value> Snapshot::Delete(const Arguments& args) {
 
 Handle<Value> Snapshot::New(const HeapSnapshot* snapshot) {
   HandleScope scope;
-  
+
   if (snapshot_template_.IsEmpty()) {
     Snapshot::Initialize();
   }
-  
+
   if(!snapshot) {
     return Undefined();
   }
@@ -157,7 +157,7 @@ class OutputStreamAdapter : public v8::OutputStream {
 
       abort = Local<Value>::New(Boolean::New(false));
     }
-     
+
     void EndOfStream() {
       TryCatch try_catch;
       onEndFunction->Call(obj, 0, NULL);
@@ -166,14 +166,14 @@ class OutputStreamAdapter : public v8::OutputStream {
         FatalException(try_catch);
       }
     }
-    
-    int GetChunkSize() { 
-      return 10240; 
+
+    int GetChunkSize() {
+      return 10240;
     }
-    
+
     WriteResult WriteAsciiChunk(char* data, int size) {
       HandleScope scope;
-      
+
       Handle<Value> argv[2] = {
         Buffer::New(data, size)->handle_,
         Integer::New(size)
@@ -206,12 +206,12 @@ Handle<Value> Snapshot::Serialize(const Arguments& args) {
   Handle<Object> self = args.This();
 
   uint32_t argslen = args.Length();
-  
+
   if (argslen == 0) {
     return ThrowException(Exception::TypeError(
       String::New("You must specify arguments to invoke this function")));
   }
-  
+
   OutputStreamAdapter *stream = new OutputStreamAdapter(args[0]);
 
   void* ptr = self->GetPointerFromInternalField(0);
