@@ -1,6 +1,6 @@
 {
   "name": "v8-profiler",
-  "version": "3.7.0",
+  "version": "3.7.1",
   "description": "node.js bindings for the v8 profiler",
   "homepage": "http://github.com/skomski/v8-profiler",
   "keywords": ["profiler", "inspector"],
