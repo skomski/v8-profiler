@@ -1,4 +1,4 @@
-# v8-profiler [![Build Status](https://secure.travis-ci.org/Skomski/v8-profiler.png?branch=master)](http://travis-ci.org/Skomski/v8-profiler)
+# v8-profiler [![Build Status](https://secure.travis-ci.org/Skomski/v8-profiler.png?branch=unstable)](http://travis-ci.org/Skomski/v8-profiler)
 
 node.js bindings for the v8 profiler
 
