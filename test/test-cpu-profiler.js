@@ -8,7 +8,7 @@ function fibonacci(n) {
   if (n <= 1) return n;
   return fibonacci(n - 2) + fibonacci(n - 1);
 }
-for (var i = 0; i < 20; i++) {
+for (var i = 0; i < 40; i++) {
   fibonacci(i);
 }
 var cpuProfile = profiler.stopProfiling('test');
