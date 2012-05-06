@@ -3,7 +3,7 @@ var assert = require('assert');
 
 var testFinished = false;
 
-function TestObject() { this.status = 200; };
+function TestObject() { this.status = [200]; };
 
 var test = new TestObject();
 
@@ -19,6 +19,10 @@ var foundTestNode = false;
 
 for (var key in nodes) {
   var node = nodes[key];
+
+  assert(node.type);
+  node.getHeapValue() + '';
+
   if (node.type === 'Object' && node.name === 'TestObject' && node.size > 40) {
     assert.deepEqual(node.value, { status: 200 });
     assert.ok(node.retainersCount);

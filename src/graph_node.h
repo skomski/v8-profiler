@@ -16,13 +16,13 @@ class GraphNode {
  private:
    static Handle<Value> GetType(Local<String> property, const AccessorInfo& info);
    static Handle<Value> GetName(Local<String> property, const AccessorInfo& info);
-   static Handle<Value> GetValue(Local<String> property, const AccessorInfo& info);
    static Handle<Value> GetId(Local<String> property, const AccessorInfo& info);
    static Handle<Value> GetPtr(Local<String> property, const AccessorInfo& info);
    static Handle<Value> GetChildrenCount(Local<String> property, const AccessorInfo& info);
    static Handle<Value> GetRetainersCount(Local<String> property, const AccessorInfo& info);
    static Handle<Value> GetSize(Local<String> property, const AccessorInfo& info);
    static Handle<Value> GetChild(const Arguments& args);
+   static Handle<Value> GetHeapValue(const Arguments& args);
    static Handle<Value> GetRetainedSize(const Arguments& args);
    static Handle<Value> GetRetainer(const Arguments& args);
    static Handle<Value> GetDominator(Local<String> property, const AccessorInfo& info);

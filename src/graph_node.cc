@@ -11,18 +11,30 @@ Persistent<ObjectTemplate> GraphNode::node_template_;
 void GraphNode::Initialize() {
   node_template_ = Persistent<ObjectTemplate>::New(ObjectTemplate::New());
   node_template_->SetInternalFieldCount(1);
-  node_template_->SetAccessor(String::New("type"), GraphNode::GetType);
-  node_template_->SetAccessor(String::New("name"), GraphNode::GetName);
-  node_template_->SetAccessor(String::New("value"), GraphNode::GetValue);
-  node_template_->SetAccessor(String::New("id"), GraphNode::GetId);
-  node_template_->SetAccessor(String::New("ptr"), GraphNode::GetPtr);
-  node_template_->SetAccessor(String::New("childrenCount"), GraphNode::GetChildrenCount);
-  node_template_->SetAccessor(String::New("retainersCount"), GraphNode::GetRetainersCount);
-  node_template_->SetAccessor(String::New("size"), GraphNode::GetSize);
-  node_template_->SetAccessor(String::New("dominatorNode"), GraphNode::GetDominator);
-  node_template_->Set(String::New("getChild"), FunctionTemplate::New(GraphNode::GetChild));
-  node_template_->Set(String::New("retainedSize"), FunctionTemplate::New(GraphNode::GetRetainedSize));
-  node_template_->Set(String::New("getRetainer"), FunctionTemplate::New(GraphNode::GetRetainer));
+  node_template_->SetAccessor(String::NewSymbol("type"), GraphNode::GetType);
+  node_template_->SetAccessor(String::NewSymbol("name"), GraphNode::GetName);
+  node_template_->SetAccessor(String::NewSymbol("id"), GraphNode::GetId);
+  node_template_->SetAccessor(String::NewSymbol("ptr"), GraphNode::GetPtr);
+  node_template_->SetAccessor(
+      String::NewSymbol("childrenCount"), GraphNode::GetChildrenCount);
+  node_template_->SetAccessor(
+      String::NewSymbol("retainersCount"), GraphNode::GetRetainersCount);
+  node_template_->SetAccessor(
+      String::NewSymbol("size"), GraphNode::GetSize);
+  node_template_->SetAccessor(
+      String::NewSymbol("dominatorNode"), GraphNode::GetDominator);
+  node_template_->Set(
+      String::NewSymbol("getChild"),
+      FunctionTemplate::New(GraphNode::GetChild));
+  node_template_->Set(
+      String::NewSymbol("retainedSize"),
+      FunctionTemplate::New(GraphNode::GetRetainedSize));
+  node_template_->Set(
+      String::NewSymbol("getRetainer"),
+      FunctionTemplate::New(GraphNode::GetRetainer));
+  node_template_->Set(
+      String::NewSymbol("getHeapValue"),
+      FunctionTemplate::New(GraphNode::GetHeapValue));
 }
 
 Handle<Value> GraphNode::GetType(Local<String> property, const AccessorInfo& info) {
@@ -70,13 +82,6 @@ Handle<Value> GraphNode::GetName(Local<String> property, const AccessorInfo& inf
   return scope.Close(title);
 }
 
-Handle<Value> GraphNode::GetValue(Local<String> property, const AccessorInfo& info) {
-  HandleScope scope;
-  Local<Object> self = info.Holder();
-  void* ptr = self->GetPointerFromInternalField(0);
-  Handle<Value> value = static_cast<HeapGraphNode*>(ptr)->GetHeapValue();
-  return scope.Close(value);
-}
 
 Handle<Value> GraphNode::GetId(Local<String> property, const AccessorInfo& info) {
   HandleScope scope;
@@ -149,6 +154,13 @@ Handle<Value> GraphNode::GetRetainedSize(const Arguments& args) {
 #endif
 
   return scope.Close(Integer::New(size));
+}
+
+Handle<Value> GraphNode::GetHeapValue(const Arguments& args) {
+  HandleScope scope;
+  Handle<Object> self = args.This();
+  HeapGraphNode* node = static_cast<HeapGraphNode*>(self->GetPointerFromInternalField(0));
+  return scope.Close(node->GetHeapValue());
 }
 
 Handle<Value> GraphNode::GetRetainer(const Arguments& args) {
