@@ -23,6 +23,8 @@ class GraphNode {
    static Handle<Value> GetSize(Local<String> property, const AccessorInfo& info);
    static Handle<Value> GetChild(const Arguments& args);
    static Handle<Value> GetHeapValue(const Arguments& args);
+   // get the value of this node, but only if we can safely do it.
+   static Handle<Value> GetHeapValueSafe(const Arguments& args);
    static Handle<Value> GetRetainedSize(const Arguments& args);
    static Handle<Value> GetRetainer(const Arguments& args);
    static Handle<Value> GetDominator(Local<String> property, const AccessorInfo& info);

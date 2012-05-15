@@ -2,6 +2,8 @@
 #include "graph_edge.h"
 #include "node_version.h"
 
+#include <string.h>
+
 using namespace v8;
 
 namespace nodex {
@@ -35,6 +37,9 @@ void GraphNode::Initialize() {
   node_template_->Set(
       String::NewSymbol("getHeapValue"),
       FunctionTemplate::New(GraphNode::GetHeapValue));
+  node_template_->Set(
+      String::NewSymbol("getHeapValueSafe"),
+      FunctionTemplate::New(GraphNode::GetHeapValueSafe));
 }
 
 Handle<Value> GraphNode::GetType(Local<String> property, const AccessorInfo& info) {
@@ -155,6 +160,83 @@ Handle<Value> GraphNode::GetRetainedSize(const Arguments& args) {
 
   return scope.Close(Integer::New(size));
 }
+
+// get the value underlying this node, but only if it is safe to do so (This may be over conservative).
+// If we can't get it, return undefined
+Handle<Value> GraphNode::GetHeapValueSafe(const Arguments& args) 
+{
+  HandleScope scope;
+  Handle<Object> self = args.This();
+  HeapGraphNode* node = static_cast<HeapGraphNode*>(self->GetPointerFromInternalField(0));
+  int32_t type = node->GetType(); 			// get type of Node
+  Handle<String> title = node->GetName();		// get the name of the node
+  v8::String::AsciiValue str(title);			// get ascii rep of name
+  char* name = *str;					// make it easier to play with
+  if (name[0] == '(') {
+    // we assume this is not safe if name begins with a '('
+    return scope.Close(v8::Undefined());
+  }
+  
+  // now check type to see if it is safe
+  int ok = 0;
+  switch(type) {
+  case HeapGraphNode::kArray :
+    if (strlen(name) == 0) ok = 0;
+    else ok=1;
+    break;
+
+  case HeapGraphNode::kString :
+    // special case as some strings seem to cause a seg fault, so return the name
+    return scope.Close(title);
+    break;
+
+  case HeapGraphNode::kObject :
+    {
+      // see if dominator has name system / FunctionTemplate or system / ObjectTemplateInfo we skip this
+      const HeapGraphNode* dom = node->GetDominatorNode();
+      Handle<String> domName = dom->GetName();	// get the name of the dominator node
+      v8::String::AsciiValue dstr(domName); 	// get ascii rep of dominator name
+      char* dname = *dstr;			// make it easier to play with
+      if ((strcmp(dname , "system / FunctionTemplate") == 0)||
+	  (strcmp(dname , "system / ObjectTemplateInfo") == 0)) 
+	ok = 0;
+      else
+	ok = 1;
+    }
+    break;
+
+  case HeapGraphNode::kCode :
+    ok = 0;
+    break;
+
+  case HeapGraphNode::kClosure :
+    ok = 0;
+    break;
+
+  case HeapGraphNode::kRegExp :
+    ok = 1;
+    break;
+
+  case HeapGraphNode::kHeapNumber :
+    ok = 0;
+    break;
+
+  case HeapGraphNode::kNative :
+    ok = 0;
+    break;
+
+  default:
+    ok = 0;
+    break;
+  }
+
+  if (ok == 0) {
+    return scope.Close(v8::Undefined());
+  } else {
+    return scope.Close(node->GetHeapValue());
+  }
+}
+
 
 Handle<Value> GraphNode::GetHeapValue(const Arguments& args) {
   HandleScope scope;
