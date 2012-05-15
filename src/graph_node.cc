@@ -173,7 +173,9 @@ Handle<Value> GraphNode::GetHeapValueSafe(const Arguments& args)
   v8::String::AsciiValue str(title);			// get ascii rep of name
   char* name = *str;					// make it easier to play with
   if (name[0] == '(') {
-    // we assume this is not safe if name begins with a '('
+    // we assume this is not safe if name begins with a '(' as those
+    // objects seem to be system objects and emperically cause a seg
+    // fault.
     return scope.Close(v8::Undefined());
   }
   
@@ -197,7 +199,7 @@ Handle<Value> GraphNode::GetHeapValueSafe(const Arguments& args)
       Handle<String> domName = dom->GetName();	// get the name of the dominator node
       v8::String::AsciiValue dstr(domName); 	// get ascii rep of dominator name
       char* dname = *dstr;			// make it easier to play with
-      if ((strcmp(dname , "system / FunctionTemplate") == 0)||
+      if ((strcmp(dname , "system / FunctionTemplateInfo") == 0)||
 	  (strcmp(dname , "system / ObjectTemplateInfo") == 0)) 
 	ok = 0;
       else
@@ -210,7 +212,7 @@ Handle<Value> GraphNode::GetHeapValueSafe(const Arguments& args)
     break;
 
   case HeapGraphNode::kClosure :
-    ok = 0;
+    ok = 1;
     break;
 
   case HeapGraphNode::kRegExp :
