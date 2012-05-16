@@ -21,12 +21,15 @@ for (var key in nodes) {
   var node = nodes[key];
 
   assert(node.type);
-  node.getHeapValue() + '';
+  node.getHeapValueSafe();
 
   if (node.type === 'Object' && node.name === 'TestObject' && node.size > 40) {
-    assert.deepEqual(node.value, { status: 200 });
-    assert.ok(node.retainersCount);
-    foundTestNode = true;
+    var val = node.getHeapValueSafe();
+    if (val != undefined) {
+      assert.deepEqual(val, { status: [200] });
+      assert.ok(node.retainersCount);
+      foundTestNode = true;
+    }
   }
 }
 
