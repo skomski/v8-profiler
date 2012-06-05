@@ -2,6 +2,8 @@
 #include "graph_edge.h"
 #include "node_version.h"
 
+#include <string.h>
+
 using namespace v8;
 
 namespace nodex {
@@ -35,6 +37,9 @@ void GraphNode::Initialize() {
   node_template_->Set(
       String::NewSymbol("getHeapValue"),
       FunctionTemplate::New(GraphNode::GetHeapValue));
+  node_template_->Set(
+      String::NewSymbol("getHeapValueSafe"),
+      FunctionTemplate::New(GraphNode::GetHeapValueSafe));
 }
 
 Handle<Value> GraphNode::GetType(Local<String> property, const AccessorInfo& info) {
@@ -155,6 +160,98 @@ Handle<Value> GraphNode::GetRetainedSize(const Arguments& args) {
 
   return scope.Close(Integer::New(size));
 }
+
+////////
+// GetHeapValueSafe
+//
+// get the value underlying this node, but only if it is safe to do so
+// (This may be over conservative).  If we can't get it, return
+// undefined
+
+Handle<Value> GraphNode::GetHeapValueSafe(const Arguments& args) 
+{
+  HandleScope scope;
+  Handle<Object> self = args.This();
+  HeapGraphNode* node = static_cast<HeapGraphNode*>(self->GetPointerFromInternalField(0));
+  int32_t type = node->GetType();                       // get type of Node
+  Handle<String> title = node->GetName();               // get the name of the node
+  v8::String::AsciiValue str(title);                    // get ascii rep of name
+  char* name = *str;                                    // make it easier to play with
+  if (name[0] == '(') {
+    // we assume this is not safe if name begins with a '(' as those
+    // objects seem to be system objects and emperically cause a seg
+    // fault.
+    return scope.Close(v8::Undefined());
+  }
+  
+  // now check type to see if it is safe
+  int ok = 0;
+  switch(type) {
+  case HeapGraphNode::kArray :
+    // type array with an empty name seems to segfault
+    if (strlen(name) == 0) ok = 0;
+    else ok=1;
+    break;
+
+  case HeapGraphNode::kString :
+    // special case as some strings seem to cause a seg fault, so return the name
+    return scope.Close(title);
+    break;
+
+  case HeapGraphNode::kObject :
+    {
+      // see if dominator has name system / FunctionTemplate or system / ObjectTemplateInfo 
+      // we skip this as it often causes a seg
+      // fault
+      const HeapGraphNode* dom = node->GetDominatorNode();
+      Handle<String> domName = dom->GetName();  // get the name of the dominator node
+      v8::String::AsciiValue dstr(domName);     // get ascii rep of dominator name
+      char* dname = *dstr;                      // make it easier to play with
+      if ((strcmp(dname , "system / FunctionTemplateInfo") == 0)||
+          (strcmp(dname , "system / ObjectTemplateInfo") == 0)) 
+        ok = 0;
+      else
+        ok = 1;
+    }
+    break;
+
+  case HeapGraphNode::kCode :
+    // pretty useless for user, so skip it
+    ok = 0;
+    break;
+
+  case HeapGraphNode::kClosure :
+    ok = 1;
+    break;
+
+  case HeapGraphNode::kRegExp :
+    ok = 1;
+    break;
+
+  case HeapGraphNode::kHeapNumber :
+    // don't know what this is, so skip it
+    ok = 0;
+    break;
+
+  case HeapGraphNode::kNative :
+    // haven't seen this, so don't know if it causes a seg fault or not, so skip it
+    ok = 0;
+    break;
+
+  default:
+    // don't know what this is, so skip it
+    ok = 0;
+    break;
+  }
+
+  // based on tests above either return the heap value or undefined
+  if (ok == 0) {
+    return scope.Close(v8::Undefined());
+  } else {
+    return scope.Close(node->GetHeapValue());
+  }
+}
+
 
 Handle<Value> GraphNode::GetHeapValue(const Arguments& args) {
   HandleScope scope;
