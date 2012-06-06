@@ -48,8 +48,6 @@ for (var key in nodes) {
       var children = heapshot.children(node);
       for (var childKey in children) {
         var childNode = children[childKey];
-        console.log(childNode.name);
-        console.log(childNode.to.getHeapValueSafe());
 
         switch(childNode.name) {
           case 'function':

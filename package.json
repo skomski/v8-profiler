@@ -7,6 +7,6 @@
   "engines" : { "node": ">=0.6" },
   "main" : "lib/v8-profiler",
   "scripts": {
-     "test": "node test/test-heapshot.js && node test/test-cpu-profiler.js && node test/test-safeheapvalue.js"
+     "test": "make test"
   }
 }

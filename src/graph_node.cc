@@ -1,7 +1,6 @@
 #include "graph_node.h"
 #include "graph_edge.h"
 #include "node_version.h"
-#include <iostream>
 
 #include <string.h>
 

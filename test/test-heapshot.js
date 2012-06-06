@@ -21,7 +21,6 @@ for (var key in nodes) {
   var node = nodes[key];
 
   assert(node.type);
-  node.getHeapValueSafe();
 
   if (node.type === 'Object' && node.name === 'TestObject' && node.size > 40) {
     var val = node.getHeapValueSafe();
