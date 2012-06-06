@@ -28,7 +28,7 @@ for (var key in nodes) {
   var node = nodes[key];
 
   try {
-    node.getHeapValueSafe() + '';
+    if (node.name != 'SlowBuffer') node.getHeapValueSafe() + '';
   } catch (err) {
     assert.equal(err.name, 'TypeError');
   }
