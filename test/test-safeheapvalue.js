@@ -1,7 +1,7 @@
 // test out the getHeapValueSafe function.  make sure it completes and
 // doesn't miss or get anything that is unexpected.
 
-var profiler = require('v8-profiler');
+var profiler = require('..');
 var assert = require('assert');
 
 // define some objects, arrays, etc.
