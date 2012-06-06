@@ -74,11 +74,11 @@ Handle<Value> GraphEdge::GetTo(Local<String> property, const AccessorInfo& info)
 
 Handle<Value> GraphEdge::New(const HeapGraphEdge* edge) {
   HandleScope scope;
-  
+
   if (edge_template_.IsEmpty()) {
     GraphEdge::Initialize();
   }
-  
+
   if(!edge) {
     return Undefined();
   }
